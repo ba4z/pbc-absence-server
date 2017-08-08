@@ -18,6 +18,7 @@
     //DB_COLUMNS
     define("ID", "id");
     define("PERSON_ID", "personId");
+    define("MEETING_ID", "meetingId");
     define("FIRST_NAME", "firstname");
     define("LAST_NAME", "lastname");
     define("CLASSNAME", "class");

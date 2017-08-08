@@ -71,27 +71,29 @@ if(isset($_POST["function"])) {
             }
             break;
         case "submitExcuse":
-            //$db->insertAbsence($personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone, $mobile);
-            if($_POST["token"] && $_POST["instanceId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"] && $_POST["mobile"]) {
-
+            if($_POST["token"] && $_POST["personId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"] && $_POST["mobile"]) {
+                require_once "db.php";  
+                $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
+                echo $db->insertAbsence($_POST["personId"], $_POST["firstName"], $_POST["lastName"], $_POST["className"], $_POST["period"], $_POST["date"], $_POST["reason"], $_POST["absenceType"], $_POST["email"], $_POST["phone"]);
             }
             break;
         case "getAbsences":
-            // require_once "db.php";  
-            // $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
-            // $absences = $db->getAbsences();
-            // $submission = array();
-            // while ($row = mysql_fetch_array($absence)) {
-            //     $submission[REASON] = $row[REASON];
-            //     $submission[CLASSNAME] = $row[CLASSNAME];
-            //     $submission[PERIOD] = $row[PERIOD];
-            //     $submission[PERSON_ID] = $row[PERSON_ID];
-            //     $submission[DATE] = $row[DATE];
-            //     $submission[ABSENCE_TYPE] = $row[ABSENCE_TYPE];
-            //     $submission[ID] = $row[ID];
-            // }
+            require_once "db.php";  
+            $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
+            $absences = $db->getAbsences();
+            $submission = array();
+            while ($row = mysql_fetch_array($absence)) {
+                $submission[REASON] = $row[REASON];
+                $submission[CLASSNAME] = $row[CLASSNAME];
+                $submission[MEETING_ID] = $row[MEETING_ID];
+                $submission[PERIOD] = $row[PERIOD];
+                $submission[PERSON_ID] = $row[PERSON_ID];
+                $submission[DATE] = $row[DATE];
+                $submission[ABSENCE_TYPE] = $row[ABSENCE_TYPE];
+                $submission[ID] = $row[ID];
+            }
 
-            // echo json_encode($submission);
+            echo json_encode($submission);
             break;
     }
 
@@ -105,67 +107,67 @@ if(isset($_POST["function"])) {
 
 
 
-if(isset($_POST["logout"]) && $_POST["logout"] == true){
-    //logout
-    session_unset();
-    session_destroy();
-    exit;
+// if(isset($_POST["logout"]) && $_POST["logout"] == true){
+//     //logout
+//     session_unset();
+//     session_destroy();
+//     exit;
 
-} else if (isset($_SESSION[SES_PERSON_ID]) && !empty ($_SESSION[SES_PERSON_ID]) && isset($_POST["type"]) && isset($_POST["class"]) && isset($_POST["date"])) {
-    require_once "php/db.php";
+// } else if (isset($_SESSION[SES_PERSON_ID]) && !empty ($_SESSION[SES_PERSON_ID]) && isset($_POST["type"]) && isset($_POST["class"]) && isset($_POST["date"])) {
+//     require_once "php/db.php";
 
-    //Enter form into database, but escape strings first
-    $personId = $_SESSION[PERSON_ID];
-    $firstName = htmlspecialchars($_SESSION[FIRST_NAME]);
-    $lastName = htmlspecialchars($_SESSION[LAST_NAME]);
-    $email = htmlspecialchars($_SESSION[EMAIL]);
-    $phone = htmlspecialchars($_SESSION[PHONE]);
+//     //Enter form into database, but escape strings first
+//     $personId = $_SESSION[PERSON_ID];
+//     $firstName = htmlspecialchars($_SESSION[FIRST_NAME]);
+//     $lastName = htmlspecialchars($_SESSION[LAST_NAME]);
+//     $email = htmlspecialchars($_SESSION[EMAIL]);
+//     $phone = htmlspecialchars($_SESSION[PHONE]);
 
-    $className = htmlspecialchars($_POST[CLASSNAME]);
-    $period = htmlspecialchars($_POST[PERIOD]);
-    $date = $_POST[DATE];
+//     $className = htmlspecialchars($_POST[CLASSNAME]);
+//     $period = htmlspecialchars($_POST[PERIOD]);
+//     $date = $_POST[DATE];
 
-    //Make sure date is correct
-    if (empty($date) || checkDatePattern($date) == false || $date == '0000-00-00') {
-        header("Location: form.php?submit=fail&reason=Date incorrect");
-        exit;
-    }
+//     //Make sure date is correct
+//     if (empty($date) || checkDatePattern($date) == false || $date == '0000-00-00') {
+//         header("Location: form.php?submit=fail&reason=Date incorrect");
+//         exit;
+//     }
 
-    //Escape weird characters and prevent incorrect xml display for the overview
-    $reason = htmlspecialchars($_POST[REASON]);
-    $absenceType = $_POST[ABSENCE_TYPE];
+//     //Escape weird characters and prevent incorrect xml display for the overview
+//     $reason = htmlspecialchars($_POST[REASON]);
+//     $absenceType = $_POST[ABSENCE_TYPE];
 
-    $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
+//     $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
 
-    $resubmitId = $_POST[ID];
-    if(!empty($resubmitId)){
-        $db->resubmitAbsence($resubmitId, $className, $period, $date, $absenceType, $mobile);
-    }else {
-        $db->insertAbsence($personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone, $mobile);
-    }
+//     $resubmitId = $_POST[ID];
+//     if(!empty($resubmitId)){
+//         $db->resubmitAbsence($resubmitId, $className, $period, $date, $absenceType, $mobile);
+//     }else {
+//         $db->insertAbsence($personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone, $mobile);
+//     }
 
-    $db->close();
+//     $db->close();
 
-    exit;
+//     exit;
 
-} else if (isset($_SESSION[SES_PERSON_ID]) && !empty ($_SESSION[SES_PERSON_ID]) && isset($_POST["id"])) {
-    require_once "php/db.php";
-    //Get submission from DB and return it to the form to be automatically filled in
-    $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
-    $absence = $db->getAbsence($_POST["id"]);
+// } else if (isset($_SESSION[SES_PERSON_ID]) && !empty ($_SESSION[SES_PERSON_ID]) && isset($_POST["id"])) {
+//     require_once "php/db.php";
+//     //Get submission from DB and return it to the form to be automatically filled in
+//     $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
+//     $absence = $db->getAbsence($_POST["id"]);
 
-    $submission = array();
-    while ($row = mysql_fetch_array($absence)) {
-        $submission[REASON] = $row[REASON];
-        $submission[CLASSNAME] = $row[CLASSNAME];
-        $submission[PERIOD] = $row[PERIOD];
-        $submission[PERSON_ID] = $row[PERSON_ID];
-        $submission[DATE] = $row[DATE];
-        $submission[ABSENCE_TYPE] = $row[ABSENCE_TYPE];
-        $submission[ID] = $row[ID];
-    }
+//     $submission = array();
+//     while ($row = mysql_fetch_array($absence)) {
+//         $submission[REASON] = $row[REASON];
+//         $submission[CLASSNAME] = $row[CLASSNAME];
+//         $submission[PERIOD] = $row[PERIOD];
+//         $submission[PERSON_ID] = $row[PERSON_ID];
+//         $submission[DATE] = $row[DATE];
+//         $submission[ABSENCE_TYPE] = $row[ABSENCE_TYPE];
+//         $submission[ID] = $row[ID];
+//     }
 
-    print json_encode($submission);
-    exit;
+//     print json_encode($submission);
+//     exit;
 
-}
+// }

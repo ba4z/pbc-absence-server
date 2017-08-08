@@ -293,9 +293,10 @@
      * Creates an insert statement based on the column-value pair.
      * @param $personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType
     */
-    function insertAbsence($personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone, $mobile) {
+    function insertAbsence($personId, $meetingId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone) {
 
         $personId = mysql_real_escape_string($personId);
+        $meetingId = mysql_real_escape_string($meetingId);
         $firstName = mysql_real_escape_string($firstName);
         $lastName = mysql_real_escape_string($lastName);
         $className = mysql_real_escape_string($className);
@@ -304,23 +305,18 @@
         $reason = mysql_real_escape_string($reason);
         $absenceType = mysql_real_escape_string($absenceType);
 
-        $query = "INSERT INTO `absence`(`personId`, `firstname`, `lastname`, `class`, `period`, `date`, `reason`, `type`, `email`, `phone`, `mobile`)" .
-                  " VALUES (\"$personId\", \"$firstName\", \"$lastName\", \"$className\", \"$period\", \"$date\", \"$reason\", \"$absenceType\", \"$email\", \"$phone\", \"$mobile\")";
-
-
-        //Execute
-        $this->execute($query);
+        $query = "INSERT INTO `absence`(`personId`, `meetingId` , `firstname`, `lastname`, `class`, `period`, `date`, `reason`, `type`, `email`, `phone`, `mobile`)" .
+                  " VALUES (\"$personId\",\"$meetingId\", \"$firstName\", \"$lastName\", \"$className\", \"$period\", \"$date\", \"$reason\", \"$absenceType\", \"$email\", \"$phone\", \"$mobile\")";
+        return $this->execute($query);
     }
 
-    function resubmitAbsence($id,  $className, $period, $date, $absenceType, $mobile){
+    function resubmitAbsence($id, $className, $period, $date, $absenceType, $mobile){
         $className = mysql_real_escape_string($className);
         $period = mysql_real_escape_string($period);
         $date = mysql_real_escape_string($date);
         $absenceType = mysql_real_escape_string($absenceType);
 
         $query = "UPDATE `absence` SET `class`=\"$className\",`period`=\"$period\",`date`=\"$date\",`type`=\"$absenceType\", `resubmitted`= 1, `mobile`=\"$mobile\", `status`= 'NULL' WHERE `id` = \"$id\"";
-
-        //Execute
         $this->execute($query);
 
     }
