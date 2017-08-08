@@ -38,6 +38,8 @@ if(isset($_POST["function"])) {
             if($_POST["token"]){
                 $token = $_POST["token"];
                 echo $populiService->getCurrentTerm($token);
+            } else {
+                echo http_response_code(400);
             }
             break;
         case "getPerson":
@@ -45,6 +47,8 @@ if(isset($_POST["function"])) {
                 $token = $_POST["token"];
                 $personId = $_POST["personId"];
                 echo $populiService->getPerson($token, $personId);
+            } else {
+                echo http_response_code(400);
             }
             break;
         case "getStudentCourses":
@@ -53,6 +57,8 @@ if(isset($_POST["function"])) {
                 $token = $_POST["token"];
                 $termId = $_POST["termId"];
                 echo $populiService->getMyCourses($token, $termId, $personId);
+            } else {
+                echo http_response_code(400);
             }
             break;
         case "getCourseInstanceMeetings":
@@ -60,6 +66,8 @@ if(isset($_POST["function"])) {
                 $token = $_POST["token"];
                 $instanceId = $_POST["instanceId"];
                 echo $populiService->getCourseInstanceMeetings($token, $instanceId);
+            } else {
+                echo http_response_code(400);
             }
             break;
         case "getCourseInstanceMeetingAttendance":
@@ -68,13 +76,17 @@ if(isset($_POST["function"])) {
                 $instanceId = $_POST["instanceId"];
                 $meetingId = $_POST["meetingId"];
                 echo $populiService->getCourseInstanceMeetings($token, $instanceId, $meetingId);
+            } else {
+                echo http_response_code(400);
             }
             break;
         case "submitExcuse":
-            if($_POST["token"] && $_POST["personId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"] && $_POST["mobile"]) {
+            if($_POST["personId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"]) {
                 require_once "db.php";  
                 $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
                 echo $db->insertAbsence($_POST["personId"], $_POST["firstName"], $_POST["lastName"], $_POST["className"], $_POST["period"], $_POST["date"], $_POST["reason"], $_POST["absenceType"], $_POST["email"], $_POST["phone"]);
+            } else {
+                echo http_response_code(400);
             }
             break;
         case "getAbsences":

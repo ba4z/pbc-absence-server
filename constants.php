@@ -12,7 +12,7 @@
     //Tmp database
     define("DB_USER", "portland_att");
     define("DB_PW", "f4r7539a6U365tt");
-    define("DB_SERVER", "174.121.166.165");
+    define("DB_SERVER", "localhost");
     define("DB_NAME", "portland_attendance");
 
     //DB_COLUMNS
