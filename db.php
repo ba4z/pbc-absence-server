@@ -293,20 +293,21 @@
      * Creates an insert statement based on the column-value pair.
      * @param $personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType
     */
-    function insertAbsence($personId, $meetingId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone) {
+    function insertAbsence($personId, $instanceId, $meetingId, $firstName, $lastName, $className, $period, $dateString, $reason, $absenceType, $email, $phone) {
 
         $personId = mysql_real_escape_string($personId);
+        $instanceId = mysql_real_escape_string($instanceId);
         $meetingId = mysql_real_escape_string($meetingId);
         $firstName = mysql_real_escape_string($firstName);
         $lastName = mysql_real_escape_string($lastName);
         $className = mysql_real_escape_string($className);
         $period = mysql_real_escape_string($period);
-        $date = mysql_real_escape_string($date);
+        $date = date("Y-m-d",strtotime(mysql_real_escape_string($dateString)));
         $reason = mysql_real_escape_string($reason);
         $absenceType = mysql_real_escape_string($absenceType);
 
-        $query = "INSERT INTO `absence`(`personId`, `meetingId` , `firstname`, `lastname`, `class`, `period`, `date`, `reason`, `type`, `email`, `phone`, `mobile`)" .
-                  " VALUES (\"$personId\",\"$meetingId\", \"$firstName\", \"$lastName\", \"$className\", \"$period\", \"$date\", \"$reason\", \"$absenceType\", \"$email\", \"$phone\", \"$mobile\")";
+        $query = "INSERT INTO `absence`(`personId`, `instanceId`, `meetingId` , `firstname`, `lastname`, `class`, `period`, `date`, `reason`, `type`, `email`, `phone`, `mobile`)" .
+                  " VALUES (\"$personId\",\"$instanceId\",\"$meetingId\", \"$firstName\", \"$lastName\", \"$className\", \"$period\", \"$date\", \"$reason\", \"$absenceType\", \"$email\", \"$phone\", \"$mobile\")";
         return $this->execute($query);
     }
 
@@ -322,7 +323,7 @@
     }
 
     function getPersonSubmissions($personId){
-        $query = "SELECT * FROM `absence` WHERE `personId` = " . $personId . " AND `removed` = 0";
+        $query = "SELECT * FROM `absence` WHERE `personId` = " . mysql_real_escape_string($personId) . " AND `removed` = 0";
         return $this->query($query);
     }
 

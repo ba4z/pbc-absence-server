@@ -4,9 +4,6 @@
  * Date: 8/20/12
  */
 
-
- //75550f350f304092e032fa89c7263d7b6cf64c236ff642929f08794268f9525c300a96c01b124e0e3017e22386f2431cbea8c845b9e8af68f86e13aec0755d647aa07d90d665eeaf97e0d21b3aa1d8a498ca685e76f9afe98fb89080c138627e714d697f14cce6201b66889f8c4adf23c69330ce5e1c3ab04bfc2cc65e08f8083b29c70bb79fe40ba939841192126456b1566908c9ee5e8bb4943fa47ec9ea8d5bce29030471d28fcd1b2d4859b243c40afe9f7fe7
-
 class Populi{
 	//Set to the correct URL for your college
 	protected $api_url = 'https://pbc.populiweb.com/api/index.php';
@@ -73,6 +70,11 @@ class Populi{
     public function getTermCourseInstances($termId) {
         $param['term_id'] = $termId;
         return $this->doTask("getTermCourseInstances", $param);
+    }
+
+	public function getCourseInstance($token, $instanceId) {
+        $param['instance_id'] = $instanceId;
+        return $this->doTask($token, "getCourseInstance", $param);
     }
 
     public function getCourseInstanceMeetings($token, $instanceId) {

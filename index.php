@@ -61,6 +61,15 @@ if(isset($_POST["function"])) {
                 echo http_response_code(400);
             }
             break;
+        case "getCourseInstance":
+            if($_POST["token"] && $_POST["instanceId"]){
+                $token = $_POST["token"];
+                $instanceId = $_POST["instanceId"];
+                echo $populiService->getCourseInstance($token, $instanceId);
+            } else {
+                echo http_response_code(400);
+            }
+            break;
         case "getCourseInstanceMeetings":
             if($_POST["token"] && $_POST["instanceId"]){
                 $token = $_POST["token"];
@@ -81,105 +90,42 @@ if(isset($_POST["function"])) {
             }
             break;
         case "submitExcuse":
-            if($_POST["personId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"]) {
+            if($_POST["personId"] && $_POST["instanceId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"]) {
                 require_once "db.php";  
                 $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
-                echo $db->insertAbsence($_POST["personId"], $_POST["firstName"], $_POST["lastName"], $_POST["className"], $_POST["period"], $_POST["date"], $_POST["reason"], $_POST["absenceType"], $_POST["email"], $_POST["phone"]);
+                $db->insertAbsence($_POST["personId"], $_POST["instanceId"],$_POST["meetingId"], $_POST["firstName"], $_POST["lastName"], $_POST["className"], $_POST["period"], $_POST["date"], $_POST["reason"], $_POST["absenceType"], $_POST["email"], $_POST["phone"]);
+                echo http_response_code(200);
             } else {
                 echo http_response_code(400);
             }
             break;
-        case "getAbsences":
-            require_once "db.php";  
-            $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
-            $absences = $db->getAbsences();
-            $submission = array();
-            while ($row = mysql_fetch_array($absence)) {
-                $submission[REASON] = $row[REASON];
-                $submission[CLASSNAME] = $row[CLASSNAME];
-                $submission[MEETING_ID] = $row[MEETING_ID];
-                $submission[PERIOD] = $row[PERIOD];
-                $submission[PERSON_ID] = $row[PERSON_ID];
-                $submission[DATE] = $row[DATE];
-                $submission[ABSENCE_TYPE] = $row[ABSENCE_TYPE];
-                $submission[ID] = $row[ID];
-            }
+        case "getPersonSubmissions":
+            if($_POST["personId"]) {
+                require_once "db.php";  
+                $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
+                $absences = $db->getPersonSubmissions($_POST["personId"]);
+                
+                $submissions = array();
+                $index = 0;
+                while($row = mysql_fetch_array($absences)) {
+                    $submission = array();
+                    $submission["studentId"] =  $row["personId"];
+                    $submission["meetingId"] =  $row["meetingId"];
+                    $submission["instanceId"] =  $row["instanceId"];
+                    $submission["reason"] =  $row["reason"];
+                    $submission["timestamp"] =  $row["timestamp"];
+                    $submissions[$index] = $submission;
+                    $index++;
+                }
 
-            echo json_encode($submission);
+                echo json_encode($submission);
+            } else {
+                echo http_response_code(400);
+            }
             break;
     }
-
     return;
 } else {
     echo json_encode(array('status' => 'ok'));
     return;
 }
-
-
-
-
-
-// if(isset($_POST["logout"]) && $_POST["logout"] == true){
-//     //logout
-//     session_unset();
-//     session_destroy();
-//     exit;
-
-// } else if (isset($_SESSION[SES_PERSON_ID]) && !empty ($_SESSION[SES_PERSON_ID]) && isset($_POST["type"]) && isset($_POST["class"]) && isset($_POST["date"])) {
-//     require_once "php/db.php";
-
-//     //Enter form into database, but escape strings first
-//     $personId = $_SESSION[PERSON_ID];
-//     $firstName = htmlspecialchars($_SESSION[FIRST_NAME]);
-//     $lastName = htmlspecialchars($_SESSION[LAST_NAME]);
-//     $email = htmlspecialchars($_SESSION[EMAIL]);
-//     $phone = htmlspecialchars($_SESSION[PHONE]);
-
-//     $className = htmlspecialchars($_POST[CLASSNAME]);
-//     $period = htmlspecialchars($_POST[PERIOD]);
-//     $date = $_POST[DATE];
-
-//     //Make sure date is correct
-//     if (empty($date) || checkDatePattern($date) == false || $date == '0000-00-00') {
-//         header("Location: form.php?submit=fail&reason=Date incorrect");
-//         exit;
-//     }
-
-//     //Escape weird characters and prevent incorrect xml display for the overview
-//     $reason = htmlspecialchars($_POST[REASON]);
-//     $absenceType = $_POST[ABSENCE_TYPE];
-
-//     $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
-
-//     $resubmitId = $_POST[ID];
-//     if(!empty($resubmitId)){
-//         $db->resubmitAbsence($resubmitId, $className, $period, $date, $absenceType, $mobile);
-//     }else {
-//         $db->insertAbsence($personId, $firstName, $lastName, $className, $period, $date, $reason, $absenceType, $email, $phone, $mobile);
-//     }
-
-//     $db->close();
-
-//     exit;
-
-// } else if (isset($_SESSION[SES_PERSON_ID]) && !empty ($_SESSION[SES_PERSON_ID]) && isset($_POST["id"])) {
-//     require_once "php/db.php";
-//     //Get submission from DB and return it to the form to be automatically filled in
-//     $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
-//     $absence = $db->getAbsence($_POST["id"]);
-
-//     $submission = array();
-//     while ($row = mysql_fetch_array($absence)) {
-//         $submission[REASON] = $row[REASON];
-//         $submission[CLASSNAME] = $row[CLASSNAME];
-//         $submission[PERIOD] = $row[PERIOD];
-//         $submission[PERSON_ID] = $row[PERSON_ID];
-//         $submission[DATE] = $row[DATE];
-//         $submission[ABSENCE_TYPE] = $row[ABSENCE_TYPE];
-//         $submission[ID] = $row[ID];
-//     }
-
-//     print json_encode($submission);
-//     exit;
-
-// }
