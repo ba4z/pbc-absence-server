@@ -114,11 +114,13 @@ if(isset($_POST["function"])) {
                     $submission["instanceId"] =  $row["instanceId"];
                     $submission["reason"] =  $row["reason"];
                     $submission["timestamp"] =  $row["timestamp"];
+                    $submission["timestamp"] =  $row["timestamp"];
+                    $submission["status"] =  $row["status"];
                     $submissions[$index] = $submission;
                     $index++;
                 }
 
-                echo json_encode($submission);
+                echo json_encode($submissions);
             } else {
                 echo http_response_code(400);
             }
