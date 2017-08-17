@@ -79,6 +79,16 @@ if(isset($_POST["function"])) {
                 echo http_response_code(400);
             }
             break;
+        case "getCourseInstanceStudentAttendance":
+            if($_POST["token"] && $_POST["instanceId"] && $_POST["personId"]){
+                $token = $_POST["token"];
+                $instanceId = $_POST["instanceId"];
+                $personId = $_POST["personId"];
+                echo $populiService->getCourseInstanceStudentAttendance($token, $instanceId, $personId);
+            } else {
+                echo http_response_code(400);
+            }
+            break;
         case "getCourseInstanceMeetingAttendance":
             if($_POST["token"] && $_POST["instanceId"] && $_POST["meetingId"]) {
                 $token = $_POST["token"];

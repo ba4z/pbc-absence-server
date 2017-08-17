@@ -80,6 +80,12 @@ class Populi{
     public function getCourseInstanceMeetings($token, $instanceId) {
         $param['instanceID'] = $instanceId;
         return $this->doTask($token, "getCourseInstanceMeetings", $param);
+	}
+	
+	public function getCourseInstanceStudentAttendance($token, $instanceId, $personId) {
+        $param['instanceID'] = $instanceId;
+        $param['person_id'] = $personId;
+        return $this->doTask($token, "getCourseInstanceStudentAttendance", $param);
     }
 
 	public function getCourseInstanceMeetingAttendance($token, $instanceId, $meetingId) {
@@ -105,9 +111,6 @@ class Populi{
         $params['status'] = $status;
 
         $this->doTask("updateStudentAttendance", $params);
-        //$post = 'task=' . urlencode("updateStudentAttendance") . '&access_key=' . $this->api_token;
-        //$post .= '&instanceID=' . urlencode($instanceId) . '&studentID=' . urlencode($studentId) . '&meetingID=' . urlencode($meetingId) . '&status=' . urlencode($status);
-        
     }
 
 	private function doTask($token, $task, $params = array(), $returnArray = false) {
@@ -185,6 +188,12 @@ class PopuliException extends Exception{
 	public function __construct($message, $populi_code = 'OTHER_ERROR'){
 		parent::__construct($message);
 		$this->populi_code = $populi_code;
+		$arr = array(); //etc
+		$arr["error"] = $message;
+		$arr["code"] = $populi_code;
+
+		header('HTTP/1.1 500 Error');
+		echo json_encode($arr);
 	}
 
 	public function getPopuliCode(){
