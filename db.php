@@ -29,7 +29,7 @@
       $this->mtStart    = $this->getMicroTime();
       $this->nbQueries  = 0;
       $this->lastResult = NULL;
-      mysql_connect($server, $user, $pass) or die('Server connection not possible.');
+      @mysql_connect($server, $user, $pass) or die('Server connection not possible.');
       mysql_select_db($base)               or die('Database connection not possible.');
     }
 

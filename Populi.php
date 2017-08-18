@@ -84,8 +84,11 @@ class Populi{
 	
 	public function getCourseInstanceStudentAttendance($token, $instanceId, $personId) {
         $param['instanceID'] = $instanceId;
-        $param['person_id'] = $personId;
-        return $this->doTask($token, "getCourseInstanceStudentAttendance", $param);
+		$param['person_id'] = $personId;
+		
+		//login as admin user to perform this function
+		$adminToken = $this->login(POPULI_ADMIN, POPULI_ADMIN_PW);
+        return $this->doTask($adminToken, "getCourseInstanceStudentAttendance", $param);
     }
 
 	public function getCourseInstanceMeetingAttendance($token, $instanceId, $meetingId) {
