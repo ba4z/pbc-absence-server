@@ -137,7 +137,10 @@ if(isset($_POST["function"])) {
             break;
         case "error": 
             if($_POST["message"]) {
-                mail("bas.clancy@gmail.com","PBC Attendance Error", $_POST["message"]);
+                $headers = "MIME-Version: 1.0" . "\r\n";
+                $headers .= "Content-type:text/html;charset=UTF-8" . "\r\n";
+                $headers .= 'From: PBC Attendance<attendance@portlandbiblecollege.org>' . "\r\n";
+                mail("bas.clancy@gmail.com","PBC Attendance Error", $_POST["message"], $headers);
             }
     }
     return;
