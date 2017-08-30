@@ -100,7 +100,7 @@ if(isset($_POST["function"])) {
             }
             break;
         case "submitExcuse":
-            if($_POST["personId"] && $_POST["instanceId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"] && $_POST["email"] && $_POST["phone"]) {
+            if($_POST["personId"] && $_POST["instanceId"] && $_POST["meetingId"] && $_POST["reason"] && $_POST["firstName"] && $_POST["lastName"] && $_POST["className"] && $_POST["period"] && $_POST["date"] && $_POST["absenceType"]) {
                 require_once "db.php";  
                 $db = new DB(DB_NAME, DB_SERVER, DB_USER, DB_PW);
                 $db->insertAbsence($_POST["personId"], $_POST["instanceId"],$_POST["meetingId"], $_POST["firstName"], $_POST["lastName"], $_POST["className"], $_POST["period"], $_POST["date"], $_POST["reason"], $_POST["absenceType"], $_POST["email"], $_POST["phone"]);
