@@ -135,6 +135,10 @@ if(isset($_POST["function"])) {
                 echo http_response_code(400);
             }
             break;
+        case "error": 
+            if($_POST["message"]) {
+                mail("bas.clancy@gmail.com","PBC Attendance Error", $_POST["message"]);
+            }
     }
     return;
 } else {
