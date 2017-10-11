@@ -28,7 +28,7 @@ if(isset($_POST["function"])) {
                     $personId = $populiService->getPersonId();
                     echo json_encode(array('personId' => $personId, 'token' => $token));
                 } catch (PopuliException $e) {
-                    echo json_encode(array('error' => "Incorrect Username/password combination"));
+                    //echo json_encode(array('error' => "Incorrect Username/password combination"));
                 } catch (Exception $e) {
                     echo json_encode(array('error' => "Could connect to Populi. Please try again in a couple minutes"));
                 }
