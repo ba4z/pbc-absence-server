@@ -12,6 +12,12 @@
       */
     var $defaultDebug = false;
 
+    /**
+     * @var false|mysqli
+     * Connection for the database
+     */
+    var $conn;
+
     /** INTERNAL: The start time, in miliseconds.
       */
     var $mtStart;
@@ -29,8 +35,8 @@
       $this->mtStart    = $this->getMicroTime();
       $this->nbQueries  = 0;
       $this->lastResult = NULL;
-      @mysql_connect($server, $user, $pass) or die('Server connection not possible.');
-      mysql_select_db($base)               or die('Database connection not possible.');
+      $this->conn = @mysqli_connect($server, $user, $pass) or die('Server connection not possible.');
+      mysqli_select_db($this->conn, $base)               or die('Database connection not possible.');
     }
 
     /** Query the database.
@@ -41,7 +47,7 @@
     function query($query, $debug = -1)
     {
       $this->nbQueries++;
-      $this->lastResult = mysql_query($query) or $this->debugAndDie($query);
+      $this->lastResult = mysqli_query($this->conn, $query) or $this->debugAndDie($query);
 
       $this->debug($debug, $query, $this->lastResult);
 
@@ -55,11 +61,11 @@
     function execute($query, $debug = -1)
     {
       $this->nbQueries++;
-      mysql_query($query) or $this->debugAndDie($query);
+      mysqli_query($this->conn, $query) or $this->debugAndDie($query);
 
       $this->debug($debug, $query);
     }
-    /** Convenient method for mysql_fetch_object().
+    /** Convenient method for mysqli_fetch_object().
       * @param $result The ressource returned by query(). If NULL, the last result returned by query() will be used.
       * @return An object representing a data row.
       */
@@ -68,10 +74,10 @@
       if ($result == NULL)
         $result = $this->lastResult;
 
-      if ($result == NULL || mysql_num_rows($result) < 1)
+      if ($result == NULL || mysqli_num_rows($result) < 1)
         return NULL;
       else
-        return mysql_fetch_object($result);
+        return mysqli_fetch_object($result);
     }
     /** Get the number of rows of a query.
       * @param $result The ressource returned by query(). If NULL, the last result returned by query() will be used.
@@ -80,9 +86,9 @@
     function numRows($result = NULL)
     {
       if ($result == NULL)
-        return mysql_num_rows($this->lastResult);
+        return mysqli_num_rows($this->lastResult);
       else
-        return mysql_num_rows($result);
+        return mysqli_num_rows($result);
     }
     /** Get the result of the query as an object. The query should return a unique row.\n
       * Note: no need to add "LIMIT 1" at the end of your query because
@@ -96,11 +102,11 @@
       $query = "$query LIMIT 1";
 
       $this->nbQueries++;
-      $result = mysql_query($query) or $this->debugAndDie($query);
+      $result = mysqli_query($this->conn, $query) or $this->debugAndDie($query);
 
       $this->debug($debug, $query, $result);
 
-      return mysql_fetch_object($result);
+      return mysqli_fetch_object($result);
     }
     /** Get the result of the query as value. The query should return a unique cell.\n
       * Note: no need to add "LIMIT 1" at the end of your query because
@@ -114,8 +120,8 @@
       $query = "$query LIMIT 1";
 
       $this->nbQueries++;
-      $result = mysql_query($query) or $this->debugAndDie($query);
-      $line = mysql_fetch_row($result);
+      $result = mysqli_query($this->conn, $query) or $this->debugAndDie($query);
+      $line = mysqli_fetch_row($result);
 
       $this->debug($debug, $query, $result);
 
@@ -164,7 +170,7 @@
     function debugAndDie($query)
     {
       $this->debugQuery($query, "Error");
-      die("<p style=\"margin: 2px;\">".mysql_error()."</p></div>");
+      die("<p style=\"margin: 2px;\">".mysqli_error($this->conn)."</p></div>");
     }
     /** Internal function to debug a MySQL query.\n
       * Show the query and output the resulting table if not NULL.
@@ -182,7 +188,7 @@
       $reason = ($debug === -1 ? "Default Debug" : "Debug");
       $this->debugQuery($query, $reason);
       if ($result == NULL)
-        echo "<p style=\"margin: 2px;\">Number of affected rows: ".mysql_affected_rows()."</p></div>";
+        echo "<p style=\"margin: 2px;\">Number of affected rows: ".mysqli_affected_rows($this->conn)."</p></div>";
       else
         $this->debugResult($result);
     }
@@ -207,14 +213,14 @@
     {
       echo "<table border=\"1\" style=\"margin: 2px;\">".
            "<thead style=\"font-size: 80%\">";
-      $numFields = mysql_num_fields($result);
+      $numFields = mysqli_num_fields($result);
       // BEGIN HEADER
       $tables    = array();
       $nbTables  = -1;
       $lastTable = "";
       $fields    = array();
       $nbFields  = -1;
-      while ($column = mysql_fetch_field($result)) {
+      while ($column = mysqli_fetch_field($result)) {
         if ($column->table != $lastTable) {
           $nbTables++;
           $tables[$nbTables] = array("name" => $column->table, "count" => 1);
@@ -232,7 +238,7 @@
         echo "<th>".$fields[$i]."</th>";
       echo "</thead>";
       // END HEADER
-      while ($row = mysql_fetch_array($result)) {
+      while ($row = mysqli_fetch_array($result)) {
         echo "<tr>";
         for ($i = 0; $i < $numFields; $i++)
           echo "<td>".htmlentities($row[$i])."</td>";
@@ -262,22 +268,22 @@
       */
     function resetFetch($result)
     {
-      if (mysql_num_rows($result) > 0)
-        mysql_data_seek($result, 0);
+      if (mysqli_num_rows($result) > 0)
+        mysqli_data_seek($result, 0);
     }
     /** Get the id of the very last inserted row.
       * @return The id of the very last inserted row (in any table).
       */
     function lastInsertedId()
     {
-      return mysql_insert_id();
+      return mysqli_insert_id($this->conn);
     }
     /** Close the connexion with the database server.\n
       * It's usually unneeded since PHP do it automatically at script end.
       */
     function close()
     {
-      mysql_close();
+      mysqli_close($this->conn);
     }
 
     /** Internal method to get the current time.
@@ -295,16 +301,16 @@
     */
     function insertAbsence($personId, $instanceId, $meetingId, $firstName, $lastName, $className, $period, $dateString, $reason, $absenceType, $email, $phone) {
 
-        $personId = mysql_real_escape_string($personId);
-        $instanceId = mysql_real_escape_string($instanceId);
-        $meetingId = mysql_real_escape_string($meetingId);
-        $firstName = mysql_real_escape_string($firstName);
-        $lastName = mysql_real_escape_string($lastName);
-        $className = mysql_real_escape_string($className);
-        $period = mysql_real_escape_string($period);
-        $date = date("Y-m-d",strtotime(mysql_real_escape_string($dateString)));
-        $reason = mysql_real_escape_string($reason);
-        $absenceType = mysql_real_escape_string($absenceType);
+        $personId = mysqli_real_escape_string($this->conn, $personId);
+        $instanceId = mysqli_real_escape_string($this->conn, $instanceId);
+        $meetingId = mysqli_real_escape_string($this->conn, $meetingId);
+        $firstName = mysqli_real_escape_string($this->conn, $firstName);
+        $lastName = mysqli_real_escape_string($this->conn, $lastName);
+        $className = mysqli_real_escape_string($this->conn, $className);
+        $period = mysqli_real_escape_string($this->conn, $period);
+        $date = date("Y-m-d",strtotime(mysqli_real_escape_string($this->conn, $dateString)));
+        $reason = mysqli_real_escape_string($this->conn, $reason);
+        $absenceType = mysqli_real_escape_string($this->conn, $absenceType);
 
         $query = "INSERT INTO `absence`(`personId`, `instanceId`, `meetingId` , `firstname`, `lastname`, `class`, `period`, `date`, `reason`, `type`, `email`, `phone`, `mobile`)" .
                   " VALUES (\"$personId\",\"$instanceId\",\"$meetingId\", \"$firstName\", \"$lastName\", \"$className\", \"$period\", \"$date\", \"$reason\", \"$absenceType\", \"$email\", \"$phone\", \"$mobile\")";
@@ -312,10 +318,10 @@
     }
 
     function resubmitAbsence($id, $className, $period, $date, $absenceType, $mobile){
-        $className = mysql_real_escape_string($className);
-        $period = mysql_real_escape_string($period);
-        $date = mysql_real_escape_string($date);
-        $absenceType = mysql_real_escape_string($absenceType);
+        $className = mysqli_real_escape_string($this->conn, $className);
+        $period = mysqli_real_escape_string($this->conn, $period);
+        $date = mysqli_real_escape_string($this->conn, $date);
+        $absenceType = mysqli_real_escape_string($this->conn, $absenceType);
 
         $query = "UPDATE `absence` SET `class`=\"$className\",`period`=\"$period\",`date`=\"$date\",`type`=\"$absenceType\", `resubmitted`= 1, `mobile`=\"$mobile\", `status`= 'NULL' WHERE `id` = \"$id\"";
         $this->execute($query);
@@ -323,7 +329,7 @@
     }
 
     function getPersonSubmissions($personId){
-        $query = "SELECT * FROM `absence` WHERE `personId` = " . mysql_real_escape_string($personId) . " AND `removed` = 0";
+        $query = "SELECT * FROM `absence` WHERE `personId` = " . mysqli_real_escape_string($this->conn, $personId) . " AND `removed` = 0";
         return $this->query($query);
     }
 
